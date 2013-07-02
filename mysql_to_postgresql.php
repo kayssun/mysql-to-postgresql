@@ -256,19 +256,26 @@ if(!$db) { // The user did not ask to import any db
 				    	$field = $infofields->name;
 				    	$value = mysql_result($MyDatas, $i, $field);
 				    	
-				    	// Value
-				    	$value = str_replace("`", "'", $value); // Replaces the "`" that pg does not like
-				    	$value = str_replace("´", "'", $value); // Replaces the "´" that pg does not like
-				    	$value = stripslashes($value);
-				    	// $value = utf8_encode($value); // In case you want to change datas encoding, do it here
-				    	$value = pg_escape_string($value);
-				    	$value = "'".$value."'";
+				    	if($infofields->blob) {
+				    		$value = pg_escape_bytea($value);
+				    		$value = "'".$value."'";
+				    	} else {
+				    		// Value
+				    		$value = str_replace("`", "'", $value); // Replaces the "`" that pg does not like
+				    		$value = str_replace("´", "'", $value); // Replaces the "´" that pg does not like
+				    		$value = stripslashes($value);
+				    		// $value = utf8_encode($value); // In case you want to change datas encoding, do it here
+				    		$value = pg_escape_string($value);
+				    		$value = "'".$value."'";
 				    	
-				    	// Corrections
-				    	if($value == "'0000-00-00 00:00:00'") { $value = "1970-01-01 00:00:00"; } // PG does not permit null dates/times
-				    	elseif($value == "'0000-00-00'") { $value = "1970-01-01"; } // PG does not permit null dates
+				    		// Corrections
+				    		if($value == "'0000-00-00 00:00:00'") { $value = "1970-01-01 00:00:00"; } // PG does not permit null dates/times
+				    		elseif($value == "'0000-00-00'") { $value = "1970-01-01"; } // PG does not permit null dates
+				    	}
 	
-				    	$fields_txt .= $field.", ";
+						// If I escape all fields, I run into more problemes, so just 'freeze' for now
+						if($field=="freeze") $fields_txt .= '"' . $field . '", ';
+				    	else $fields_txt .= $field . ', ';
 				    	$values_txt .= $value.", ";
 					}
 					
