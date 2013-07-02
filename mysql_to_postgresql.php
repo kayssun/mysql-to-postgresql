@@ -166,8 +166,8 @@ if(!$db) { // The user did not ask to import any db
 				
 
 				// Simple hack, works for me:
-				$PgSchema = str_replace("freeze", "\"freeze\"", $PgSchema); // freeze is a column name here
-				$PgSchema = str_replace("timestamp integer", "\"datetime\" integer", $PgSchema); // sombody thought "datetime" is a nice column name
+				// $PgSchema = str_replace("freeze", "\"freeze\"", $PgSchema); // freeze is a column name here
+				// $PgSchema = str_replace("timestamp integer", "\"datetime\" integer", $PgSchema); // sombody thought "datetime" is a nice column name
 				
 				/*
 				// If you want to debug a Schema without trying to create it in pg
