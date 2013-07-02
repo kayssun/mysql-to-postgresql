@@ -29,7 +29,7 @@ $PgPass = "gab_password";
 $PgEncoding = "UTF8"; // LATIN1, UTF8...
 
 // Retrieve limit
-$RetrieveLimit = 100000; // How many lines should we retrieve from a table at a time => Limit the memory used by the script on your server
+$RetrieveLimit = 10000; // How many lines should we retrieve from a table at a time => Limit the memory used by the script on your server
 
 // Vars
 $db = $argv[1];
@@ -42,6 +42,8 @@ if(!$MyConn) {
 	echo "* EXITING! (sorry about that)\n";
 	exit();
 }
+
+mysql_set_charset("utf8");
 
 // PostgreSQL connection
 echo "* PostgreSQL connection...\n";
@@ -160,6 +162,12 @@ if(!$db) { // The user did not ask to import any db
 				$PgSchema = str_replace("DEFAULT '0000-00-00'", "DEFAULT current_date", $PgSchema); // PG does not permit null dates
 				$PgSchema = str_replace("CURRENT_TIMESTAMP", "NOW()", $PgSchema); // Timestamp conversion
 				$PgSchema = preg_replace("/COLLATE.utf8_bin/i", "", $PgSchema); // this COLLATION does not compute
+
+				
+
+				// Simple hack, works for me:
+				$PgSchema = str_replace("freeze", "\"freeze\"", $PgSchema); // freeze is a column name here
+				$PgSchema = str_replace("timestamp integer", "\"datetime\" integer", $PgSchema); // sombody thought "datetime" is a nice column name
 				
 				/*
 				// If you want to debug a Schema without trying to create it in pg
