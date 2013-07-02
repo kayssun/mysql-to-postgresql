@@ -137,7 +137,12 @@ if(!$db) { // The user did not ask to import any db
 				$PgSchema = preg_replace("/int\([0-9]+\)/i", "integer", $PgSchema); // Adapt the type "int"
 				$PgSchema = preg_replace("/smallinteger\([0-9]+\)/i", "smallint", $PgSchema); // Adapt the type "smallint"
 				$PgSchema = str_replace("smallinteger", "smallint", $PgSchema); // Adapt the type "smallint"
+				$PgSchema = str_replace("tinyinteger", "smallint", $PgSchema); // Adapt the type "tinyint"
+				$PgSchema = str_replace("tinyinteger", "smallint", $PgSchema); // Adapt the type "tinyint"
+				$PgSchema = str_replace("mediuminteger", "integer", $PgSchema); // Adapt the type "tinyint"
 				$PgSchema = str_replace("double(", "decimal(", $PgSchema); // Adapt the type "double"
+				$PgSchema = preg_replace("/(tinytext|mediumtext|longtext)/i", "text", $PgSchema); // Adapt the type "text"
+				$PgSchema = preg_replace("/(blob|tinyblob|mediumblob|longblob)/i", "bytea", $PgSchema); // Adapt the type "bytea"
 				$PgSchema = preg_replace("/ENGINE=[0-9a-z]+/i", "", $PgSchema); // Remove the engine type
 				$PgSchema = preg_replace("/DEFAULT CHARSET=[0-9a-z]+/i", "", $PgSchema); // Remove the default charset
 				$PgSchema = preg_replace("/AUTO_INCREMENT=[0-9a-z]+/i", "", $PgSchema); // Remove the id first value
@@ -145,15 +150,16 @@ if(!$db) { // The user did not ask to import any db
 				$PgSchema = preg_replace("/ON UPDATE[0-9a-zA-Z ()_]+/i", "", $PgSchema); // Remove the "ON UPDATE" info, you'll need a trigger for that in PG
 				$PgSchema = str_replace("NOT NULL AUTO_INCREMENT", "SERIAL NOT NULL", $PgSchema); // Convert the auto increment with not null
 				$PgSchema = str_replace("AUTO_INCREMENT", "SERIAL", $PgSchema); // Convert the auto increment without not null
-				$PgSchema = preg_replace("/(int|integer|bigint|smallint|tinyint|mediumint) SERIAL/i", "SERIAL", $PgSchema); // Remove the indexes except the primary key
+				$PgSchema = str_replace("unsigned", "", $PgSchema); // The type "UNSIGNED" is not available in PG
+				$PgSchema = str_replace("zerofill", "", $PgSchema); // The type "ZEROFILL" is not available in PG
+				$PgSchema = preg_replace("/(int|integer|bigint|smallint|tinyint|mediumint)[ ]+SERIAL/i", "SERIAL", $PgSchema); // Remove the indexes except the primary key
 				$PgSchema = str_replace("UNIQUE KEY", "KEY", $PgSchema); // Transformation of "UNIQUE KEY" to "KEY"
 				$PgSchema = preg_replace("/[^PRIMARY] Key [0-9a-z,() _]+/i", "", $PgSchema); // Remove the indexes except the primary key
 				$PgSchema = preg_replace("/,[ \n]+\)/", "\n)", $PgSchema); // Correct the syntax in case the query end by ", );"
 				$PgSchema = str_replace("DEFAULT '0000-00-00 00:00:00'", "DEFAULT NOW()", $PgSchema); // PG does not permit null dates/times
 				$PgSchema = str_replace("DEFAULT '0000-00-00'", "DEFAULT current_date", $PgSchema); // PG does not permit null dates
 				$PgSchema = str_replace("CURRENT_TIMESTAMP", "NOW()", $PgSchema); // Timestamp conversion
-				$PgSchema = str_replace("unsigned", "", $PgSchema); // The type "UNSIGNED" is not available in PG
-				$PgSchema = str_replace("zerofill", "", $PgSchema); // The type "ZEROFILL" is not available in PG
+				$PgSchema = preg_replace("/COLLATE.utf8_bin/i", "", $PgSchema); // this COLLATION does not compute
 				
 				/*
 				// If you want to debug a Schema without trying to create it in pg
